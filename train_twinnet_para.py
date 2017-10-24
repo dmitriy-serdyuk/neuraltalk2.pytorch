@@ -147,7 +147,7 @@ def train(opt):
         l2_loss = ((affine_states - invert_backstates)** 2).sum(dim=1)[:, 0, :]
         l2_loss = (l2_loss / masks[:, 1:-1].sum(dim=1).expand_as(l2_loss)).mean()
         
-        all_loss = loss + 3.0 * l2_loss + back_loss
+        all_loss = loss + opt.param_l2 * l2_loss + back_loss
         
         all_loss.backward()
         #back_loss.backward()
