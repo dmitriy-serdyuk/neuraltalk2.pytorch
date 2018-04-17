@@ -109,7 +109,7 @@ def train(opt):
         torch.cuda.synchronize()
         start = time.time()
         
-        reverse_labels = np.flip(data['labels'],1).copy()
+        reverse_labels = np.flip(data['labels'], 1).copy()
         reverse_masks = np.flip(data['masks'], 1).copy()
         tmp = [data['fc_feats'], data['att_feats'], data['labels'],reverse_labels, data['masks'], reverse_masks]
         tmp = [Variable(torch.from_numpy(_), requires_grad=False).cuda() for _ in tmp]
@@ -122,27 +122,30 @@ def train(opt):
         idx = Variable(idx).cuda()
         invert_backstates = back_states.index_select(1, idx)
 
-        loss = crit( out, labels[:,1:], masks[:,1:])
+        #loss = crit(out, labels[:, 1:], masks[:, 1:])
         
         back_loss = crit(back_out, reverse_labels[:, 1:], reverse_masks[:, 1:]) 
         
         invert_backstates = invert_backstates.detach()
-        l2_loss = ((states - invert_backstates )** 2).mean()
+        #l2_loss = ((states - invert_backstates )** 2).mean()
         
-        all_loss = loss + 1.5 * l2_loss + back_loss
+        #all_loss = loss + 1.5 * l2_loss + back_loss
+        all_loss = back_loss
         
         all_loss.backward()
         #back_loss.backward()
         utils.clip_gradient(optimizer, opt.grad_clip)
         optimizer.step()
-        train_l2_loss = l2_loss.data[0]
-        train_loss = loss.data[0]
+        #train_l2_loss = l2_loss.data[0]
+        #train_loss = loss.data[0]
         train_all_loss = all_loss.data[0]
         train_back_loss = back_loss.data[0]
         torch.cuda.synchronize()
         end = time.time()
-        print("iter {} (epoch {}), train_loss = {:.3f}, l2_loss = {:.3f}, back_loss = {:.3f}, all_loss = {:.3f}, time/batch = {:.3f}" \
-            .format(iteration, epoch, train_loss, train_l2_loss, train_back_loss, train_all_loss, end - start))
+        print("iter {} (epoch {}), back_loss = {:.3f}, all_loss = {:.3f}, time/batch = {:.3f}" \
+            .format(iteration, epoch,
+                    #train_loss, train_l2_loss,
+                    train_back_loss, train_all_loss, end - start))
 
         # Update the iteration and epoch
         iteration += 1
@@ -153,8 +156,8 @@ def train(opt):
         # Write the training loss summary
         if (iteration % opt.losses_log_every == 0):
             if tf is not None:
-                add_summary_value(tf_summary_writer, 'train_loss', train_loss, iteration)
-                add_summary_value(tf_summary_writer, 'l2_loss', train_l2_loss, iteration)
+                #add_summary_value(tf_summary_writer, 'train_loss', train_loss, iteration)
+                #add_summary_value(tf_summary_writer, 'l2_loss', train_l2_loss, iteration)
                 add_summary_value(tf_summary_writer, 'all_loss', train_all_loss, iteration)
                 add_summary_value(tf_summary_writer, 'back_loss', train_back_loss, iteration)
                 add_summary_value(tf_summary_writer, 'learning_rate', opt.current_lr, iteration)
