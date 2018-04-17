@@ -164,7 +164,7 @@ def train(opt):
                 add_summary_value(tf_summary_writer, 'scheduled_sampling_prob', model.ss_prob, iteration)
                 tf_summary_writer.flush()
 
-            loss_history[iteration] = train_loss
+            loss_history[iteration] = all_loss
             lr_history[iteration] = opt.current_lr
             ss_prob_history[iteration] = model.ss_prob
 
@@ -172,7 +172,7 @@ def train(opt):
         if (iteration % opt.save_checkpoint_every == 0):
             # eval model
             eval_kwargs = {'split': 'val',
-                            'dataset': opt.input_json}
+                           'dataset': opt.input_json}
             eval_kwargs.update(vars(opt))
             val_loss, predictions, lang_stats = eval_utils.eval_split(model, crit, loader, eval_kwargs)
 
@@ -191,7 +191,7 @@ def train(opt):
                 current_score = - val_loss
 
             best_flag = False
-            if True: # if true
+            if True:  # if true
                 if best_val_score is None or current_score > best_val_score:
                     best_val_score = current_score
                     best_flag = True
