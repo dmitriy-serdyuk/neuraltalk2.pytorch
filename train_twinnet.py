@@ -77,7 +77,7 @@ def train(opt):
     back_model.train()
 
     crit = utils.LanguageModelCriterion()
-    all_param = chain(model.parameters(), back_model.parameters()) 
+    all_param = chain(back_model.parameters())
     optimizer = optim.Adam(all_param, lr=opt.learning_rate, weight_decay=opt.weight_decay)
 
     # Load the optimizer
